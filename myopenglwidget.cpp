@@ -189,11 +189,11 @@ void MyOpenGLWidget::initializeGL() {
     pVao->bind();
 
     pVertexShader = new QOpenGLShader(QOpenGLShader::Vertex);
-    pVertexShader->compileSourceFile("../homework4_2/shader.vert");
+    pVertexShader->compileSourceFile(":/glsl/shader.vert");
     std::cout << pVertexShader->log().toLatin1().data(); // print errlog
 
     pFragmentShader = new QOpenGLShader(QOpenGLShader::Fragment);
-    pFragmentShader->compileSourceFile("../homework4_2/shader.frag");
+    pFragmentShader->compileSourceFile(":/glsl/shader.frag");
     std::cout << pFragmentShader->log().toLatin1().data();// print errlog
 
     // Must occur after the vertex shader and fragment shader objects
