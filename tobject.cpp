@@ -83,6 +83,12 @@ void TObject::addTriangle(QVector4D triangle[3])
     }
 }
 
+
+void TObject::addTriangles(GLfloat *vertices, int numVertices)
+{
+
+}
+
 void TObject::translate(float distance, int axis)
 {
     transform.translate(distance,axis);

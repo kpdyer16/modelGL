@@ -13,6 +13,28 @@ MyOpenGLWidget::~MyOpenGLWidget()
     delete world;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//********************************************
+//********************************************
+//********************************************
+
+
+
+
 void MyOpenGLWidget::newTObject()
 {
     TObject *t = new TObject(); // create new TObject

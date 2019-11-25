@@ -15,6 +15,8 @@ public:
     TObject(TObject *parent);
     ~TObject();
 
+    std::string name;
+
     std::list<TObject *> children;
     std::list<TObject *>::iterator begin();
     std::list<TObject *>::iterator end();
@@ -35,6 +37,7 @@ public:
 
 
     void addTriangle(QVector4D*); // 3 QVector4D
+    void addTriangles(GLfloat*, int); // less safe
     void clearTriangles();
 
     void translate(float, int);
