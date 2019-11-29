@@ -2,10 +2,9 @@
 
 TTransform::TTransform()
 {
-    scaleX = QMatrix4x4(0.5,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0);
-    scaleY = QMatrix4x4(0,0,0,0, 0,0.5,0,0, 0,0,0,0, 0,0,0,0);
-    scaleZ = QMatrix4x4(0,0,0,0, 0,0,0,0, 0,0,0.5,0, 0,0,0,0);
-    scaleValue.setToIdentity();
+    scaleFactorX = 1.0;
+    scaleFactorY = 1.0;
+    scaleFactorZ = 1.0;
 }
 
 TTransform::~TTransform()
@@ -13,88 +12,59 @@ TTransform::~TTransform()
 
 }
 
-void TTransform::swapAxisOrder()
-{
-    if (axisOrder == 0)
-        axisOrder = 1;
-    else
-        axisOrder = 0;
-}
 
-void TTransform::swapTransformOrder()
-{
-    if (transformOrder == 0)
-        transformOrder = 1;
-    else
-        transformOrder = 0;
-}
 
 QMatrix4x4 TTransform::transformMatrix() const
 {
-    QMatrix4x4 rotation, xform;
-    if (axisOrder == 0)
+    // 6 possible permutations
+    // SRT
+    // STR
+    // TSR
+    // RST
+    // RTS
+    // TRS
+    QMatrix4x4 scale; scale.scale(scaleFactorX, scaleFactorY, scaleFactorZ);
+    switch(transformOrder)
     {
-        // XYZ
-        rotation = rotateZ * rotateY * rotateX;
+    case 0: return mat_translate * mat_rotate * scale;
+    case 1: return mat_rotate * mat_translate * scale;
+    case 2: return mat_rotate * scale * mat_translate;
+    case 3: return mat_translate * scale * mat_rotate;
+    case 4: return scale * mat_translate * mat_rotate;
+    case 5: return scale * mat_rotate * mat_translate;
+    default: return QMatrix4x4();
     }
+}
+
+void TTransform::setTransformOrder(int order)
+{
+    if (order < 6 && order >= 0)
+        transformOrder = order;
     else
-    {
-        // YXZ
-        rotation = rotateZ * rotateX * rotateY;
-    }
-    
-    if (transformOrder == 0)
-    {
-        // SRT
-        xform = (translateX * translateY * translateZ) * rotation * (scaleValue);
-    }
-    else
-    {
-        // STR
-        xform = rotation * (translateX * translateY * translateZ) * (scaleValue);
-    }
-
-    return xform;
+        order = 0;
 }
-
-void TTransform::translate(float distance, int axis)
+void TTransform::setRotationAxisOrder(int order)
 {
-    switch(axis)
+    // 6 possible permutations
+    // xyz
+    // xzy
+    // zxy
+    // yxz
+    // yzx
+    // zyx
+    switch(order)
     {
-    case 0: translateX.translate(distance,0,0);
+    case 0: mat_rotate = mat_rotateZ * mat_rotateY * mat_rotateX;
         break;
-    case 1: translateY.translate(0,distance,0);
+    case 1: mat_rotate =  mat_rotateY * mat_rotateZ * mat_rotateX;
         break;
-    case 2: translateZ.translate(0,0,distance);
+    case 2: mat_rotate = mat_rotateY * mat_rotateX * mat_rotateZ;
         break;
-    }
-}
-
-void TTransform::rotate(float angle, int axis)
-{
-    switch(axis)
-    {
-    case 0: rotateX.rotate(angle,QVector3D(1,0,0));
+    case 3: mat_rotate = mat_rotateZ * mat_rotateX * mat_rotateY;
         break;
-    case 1: rotateY.rotate(angle,QVector3D(0,1,0));
+    case 4: mat_rotate = mat_rotateX * mat_rotateZ * mat_rotateY;
         break;
-    case 2: rotateZ.rotate(angle,QVector3D(0,0,1));
-        break;
-    }
-}
-
-void TTransform::scale(float amount,int axis)
-{
-    switch(axis)
-    {
-    case 0: if (amount > 0) scaleValue += scaleX;
-            else if (amount < 0) scaleValue -= scaleX;
-        break;
-    case 1: if (amount > 0) scaleValue += scaleY;
-            else if (amount < 0) scaleValue -= scaleY;
-        break;
-    case 2: if (amount > 0) scaleValue += scaleZ;
-            else if (amount < 0) scaleValue -= scaleZ;
+    case 5: mat_rotate = mat_rotateX * mat_rotateY * mat_rotateZ;
         break;
     }
 }

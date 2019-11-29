@@ -8,56 +8,18 @@
 #include <vector>
 #include "ttransform.h"
 
-class TObject
+struct TObject
 {
-public:
+    static int universal_id;
+
     TObject();
-    TObject(TObject *parent);
     ~TObject();
 
-    std::list<TObject *> children;
-    std::list<TObject *>::iterator begin();
-    std::list<TObject *>::iterator end();
-
-    void setTransformOrder(int order);
-    void setRotationAxisOrder(int order);
-
-    void swapTransformOrder();
-    void swapAxisOrder();
-
-    void addChild(TObject *child);
-    void removeChild(std::list<TObject *>::iterator &childIter);
-    void deleteChild(TObject *child);
-
-    void deleteChildren();
-
-    QMatrix4x4 getxform() { return transform.transformMatrix(); }
-
-
-    void addTriangle(QVector4D*); // 3 QVector4D
-    void clearTriangles();
-
-    void translate(float, int);
-    void rotate(float, int);
-    void scale(float, int);
-
-    void render(QOpenGLShaderProgram*,const QMatrix4x4 &perspective,
-                const QMatrix4x4 &camera, const QMatrix4x4 &, int) const;
-
-    // debug
-    bool hasParent() { std::cout << "parent: " << parent << std::endl; return parent != nullptr; }
-protected:
-//    void removeChild(int index);
-
-
-private:
-    TTransform transform;
-    GLfloat vertices[300][4]; // 300 vertices = 100 triangles
+    GLfloat vertices[1200]; // 100 triangles = 300 vertices * 4 floats/vertex = 1200 floats
     int vertexCount = 0; // holds the number of vertices
+    const int max_vertices = 300;
 
-    TObject *parent;
-
-    const static QVector4D white, red, blue;
+    int id; // may delete later
 };
 
 #endif // TOBJECT_H

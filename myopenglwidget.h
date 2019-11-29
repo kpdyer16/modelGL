@@ -11,8 +11,9 @@
 #include <QMouseEvent>
 #include <QWidget>
 #include <iostream>
-#include "tobject.h"
 #include "mode.h"
+
+#include <mgl_node.h>
 
 class MyOpenGLWidget : public QOpenGLWidget, public QOpenGLFunctions_4_0_Core
 {
@@ -24,7 +25,7 @@ public:
     void refresh();
 
 
-    void newTObject(); // creates new TObject and selects it
+    void newNode(); // creates new TObject and selects it
     void deleteSelected();
     void makeParentOf();
     void clearObjects();
@@ -35,8 +36,8 @@ public:
     void setKeyboardMode(int mode);
 
     void setAxis(int axis);
-    void swapTransformOrder();
-    void swapAxisOrder();
+    void swapTransformOrder(int order);
+    void swapAxisOrder(int order);
     void resetCamera();
     void selectParent();
 
@@ -79,8 +80,8 @@ private:
 
     // empty TObject to manage user-created objects
     // all newly created objects are children of worldObject
-    TObject *world;
-    std::list<TObject *>::iterator selected, aux;
+    MGL_Node *world;
+    std::list<MGL_Node *>::iterator selected, aux;
 
     // essentially a mutex for UI controls
     bool keyboardActivated = false;
@@ -97,6 +98,8 @@ private:
     QOpenGLBuffer *pBuffer;
     QOpenGLShader *pVertexShader, *pFragmentShader;
     QOpenGLShaderProgram *pShaderProgram;
+
+    void renderTree(MGL_Node *node, const QMatrix4x4 &transform, const QVector4D &color);
 
     int widgetX1,widgetY1,     // mousePressEvent coordinates
         widgetX2,widgetY2;     // mouseReleaseEvent coordinates

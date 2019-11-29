@@ -18,12 +18,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     dialog.cpp \
+    mgl_node.cpp \
     myopenglwidget.cpp \
     tobject.cpp \
     ttransform.cpp
 
 HEADERS += \
     dialog.h \
+    mgl_node.h \
     mode.h \
     myopenglwidget.h \
     tobject.h \

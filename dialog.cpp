@@ -48,7 +48,7 @@ void Dialog::on_clearButton_clicked()
 
 void Dialog::on_newObjectButton_clicked()
 {
-    ui->openGLWidget->newTObject();
+    ui->openGLWidget->newNode();
 }
 
 void Dialog::on_selectObjectButton_clicked()
@@ -124,12 +124,12 @@ void Dialog::on_zAxisRadioButton_toggled(bool checked)
 
 void Dialog::on_swapXformButton_clicked()
 {
-    ui->openGLWidget->swapTransformOrder();
+    ui->openGLWidget->swapTransformOrder(0);
 }
 
 void Dialog::on_swapAxisButton_clicked()
 {
-    ui->openGLWidget->swapAxisOrder();
+    ui->openGLWidget->swapAxisOrder(0);
 }
 
 void Dialog::on_translateCameraButton_clicked()

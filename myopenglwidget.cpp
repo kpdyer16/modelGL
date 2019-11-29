@@ -3,8 +3,8 @@
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
 {   
-    world = new TObject();
-    aux = world->end();
+    world = new MGL_Node();
+    selected = aux = world->end();
     resetCamera();
 }
 
@@ -13,79 +13,52 @@ MyOpenGLWidget::~MyOpenGLWidget()
     delete world;
 }
 
-void MyOpenGLWidget::newTObject()
+void MyOpenGLWidget::newNode()
 {
-    TObject *t = new TObject(); // create new TObject
-    world->addChild(t);         // add it to world
+    world->spawnChild();          // add it to the top level of our tree
     selected = --world->end();  // select it
-    std::cout << "new object created" << std::endl;
-    std::cout << "world now contains " << world->children.size()
-              << " top level object(s)" << std::endl;
-
-    if (!keyboardActivated)
-    {
-        setMouseMode(MModes::Select);
-    }
-    else
-    {
-        setKeyboardMode(KModes::Object);
-    }
 }
 
 void MyOpenGLWidget::deleteSelected()
 {
-    std::list<TObject *>::iterator temp = selected;
-    TObject *childToDelete = *temp;
+    auto temp = selected;
+    MGL_Node *childToDelete = *temp;
     selectNext();
-    world->removeChild(temp);
     delete childToDelete;
-
-    setMouseMode(MModes::Neutral);
-    setKeyboardMode(KModes::Neutral);
 }
 
 void MyOpenGLWidget::makeParentOf()
 {
-    if (selected == aux)
+    if (selected == aux || selected == world->end() || aux == world->end())
         return;
 
-    TObject *child = *aux;
-    world->removeChild(aux);
-    std::cout << "After removing " << child << std::endl;
-    (*selected)->addChild(child);
-
+    world->makeXChildOfY(aux,selected);
 }
 
 void MyOpenGLWidget::selectParent()
 {
-    if (keyboardActivated)
-    { if (keyboardMode != KModes::Object) setKeyboardMode(KModes::Object); }
-    else
-    { if (mouseMode != MModes::Select) setMouseMode(MModes::Select); }
-
     // sets selected to aux, aux is the future child
-    if (aux == world->end())
+    if (selected != world->end())
     {
-        aux = selected;
+        if (aux == world->end())
+        {
+            aux = selected;
+        }
+        else
+        {
+            // aux is selected, and now we've chosen a parent
+            makeParentOf();
+            aux = world->end();
+        }
     }
-    else
-    {
-        // aux is selected, and now we've chosen a parent
-        makeParentOf();
-        aux = world->end();
-    }
-
 }
 
 void MyOpenGLWidget::clearObjects()
 {
     std::cout << "clearing objects... ";
     world->deleteChildren();
-    selected = world->end();
+    selected = aux = world->end();
     std::cout << "objects cleared!" << std::endl;
-
-    setMouseMode(MModes::Neutral);
-    setKeyboardMode(KModes::Neutral);
 }
 
 void MyOpenGLWidget::activateKeyboard(bool activate)
@@ -139,32 +112,50 @@ void MyOpenGLWidget::setAxis(int a)
         axis = a;
 }
 
-void MyOpenGLWidget::swapAxisOrder()
+void MyOpenGLWidget::swapAxisOrder(int order)
 {
-    if (!keyboardActivated)
+    static int o = 0;
+    if (selected != world->end())
     {
-        if (mouseMode > MModes::Neutral && mouseMode < MModes::CameraTranslate)
-            (*selected)->swapAxisOrder();
+        (*selected)->setRotationAxisOrder(o);
+        if (o == 0)
+            o = 1;
+        else
+            o = 0;
     }
-    else
-    {
-        if (keyboardMode == KModes::Object)
-            (*selected)->swapAxisOrder();
-    }
+//    if (!keyboardActivated)
+//    {
+//        if (mouseMode > MModes::Neutral && mouseMode < MModes::CameraTranslate)
+//            (*selected)->setRotationAxisOrder();
+//    }
+//    else
+//    {
+//        if (keyboardMode == KModes::Object)
+//            (*selected)->setRotationAxisOrder();
+//    }
 }
 
-void MyOpenGLWidget::swapTransformOrder()
+void MyOpenGLWidget::swapTransformOrder(int order)
 {
-    if (!keyboardActivated)
+    static int o = 0;
+    if (selected != world->end())
     {
-        if (mouseMode > MModes::Neutral && mouseMode < MModes::CameraTranslate)
-            (*selected)->swapAxisOrder();
+        (*selected)->setXformOrder(o);
+        if (o == 0)
+            o = 1;
+        else
+            o = 0;
     }
-    else
-    {
-        if (keyboardMode == KModes::Object)
-            (*selected)->swapAxisOrder();
-    }
+//    if (!keyboardActivated)
+//    {
+//        if (mouseMode > MModes::Neutral && mouseMode < MModes::CameraTranslate)
+//            (*selected)->swapAxisOrder();
+//    }
+//    else
+//    {
+//        if (keyboardMode == KModes::Object)
+//            (*selected)->swapAxisOrder();
+//    }
 }
 
 void MyOpenGLWidget::selectNext()
@@ -213,6 +204,24 @@ void MyOpenGLWidget::paintGL()
     glClearBufferfv(GL_COLOR,0,col);
 
     QMatrix4x4 identity;
+    for (auto it = world->begin(); it != world->end(); it++)
+    {
+        if (it == selected)
+        {
+            renderTree(*it, identity, QVector4D(1.0,0.0,0.0,1.0));
+        }
+        else if (it == aux)
+        {
+            renderTree(*it, identity, QVector4D(0.0,0.0,0.25,1.0));
+        }
+        else
+        {
+            renderTree(*it, identity, QVector4D(1.0,1.0,1.0,1.0));
+        }
+    }
+
+    /*
+    QMatrix4x4 identity;
     for (auto object: world->children)
     {
         int color = 0;
@@ -230,19 +239,53 @@ void MyOpenGLWidget::paintGL()
 //                      << "selected: " << *selected << std::endl;
         }
         object->render(pShaderProgram,matPerspective,matCamera,identity,color);
+    } */
+}
+
+void MyOpenGLWidget::renderTree(MGL_Node *node, const QMatrix4x4 &transform, const QVector4D &color)
+{
+    // render triangles in the current object
+    int vertexCount = node->getVertexCount();
+    GLfloat *vertices = node->getTriangleArray();
+    QMatrix4x4 t = transform * node->getXform();
+
+    QOpenGLBuffer *pBuffer = new QOpenGLBuffer();
+    pBuffer->create();
+    pBuffer->bind();
+    pBuffer->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    pBuffer->allocate(vertices,vertexCount*16); // numVertices * 4 GLfloats/vertex * 4 bytes/GLfloat = numVertices * 16
+
+    pShaderProgram->bind();
+    pShaderProgram->enableAttributeArray("vPosition");
+    pShaderProgram->setAttributeBuffer("vPosition",GL_FLOAT,0,4);
+    int m_camLocation = pShaderProgram->uniformLocation("pers_cam_xform");
+    pShaderProgram->setUniformValue(m_camLocation, matPerspective * matCamera * t);
+    int colorLocation = pShaderProgram->uniformLocation("icolor");
+    pShaderProgram->setUniformValue(colorLocation,color);
+
+    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    glDrawArrays(GL_TRIANGLES,0,vertexCount);
+
+    pShaderProgram->disableAttributeArray("vPosition");
+    pShaderProgram->release(); // release program
+
+    pBuffer->destroy(); // destroy buffer object
+    delete pBuffer; // release buffer object memory
+
+    for (auto &obj: node->getChildren())
+    {
+        renderTree(obj, t, color);
     }
 }
 
 void MyOpenGLWidget::resizeGL(int w, int h)
 {
-    //std::cout << "resizeGL()" << std::endl;
     matPerspective.setToIdentity();// mat is a QMatrix4x4 object
     int fovy = 60;
     matPerspective.perspective(fovy, GLfloat(w)/GLfloat(h), nearclip,farclip);
 }
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent *ev) {
-    //std::cout << ev->x() << " " << ev->y() << std::endl;
     // store x and y coordinates
     widgetX1 = ev->x();
     widgetY1 = ev->y();
@@ -251,45 +294,7 @@ void MyOpenGLWidget::mousePressEvent(QMouseEvent *ev) {
 void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent *ev) {
     widgetX2 = ev->x();
     widgetY2 = ev->y();
-
-    if (!keyboardActivated)
-    {
-        switch(mouseMode)
-        {
-        case MModes::Select: setNextVertex(); // set next vertex
-            break;
-        case MModes::Translate: mouseTranslateObject(); // translate currently selected object
-            std::cout << "mouse translate" << std::endl;
-            break;
-        case MModes::Rotate: mouseRotateObject(); // rotate currently selected object
-            std::cout << "mouse rotate" << std::endl;
-            break;
-        case MModes::Scale: mouseScaleObject(); // scale currently selected object
-            std::cout << "mouse scale" << std::endl;
-            break;
-        case MModes::CameraTranslate: mouseTranslateCamera(); // translate camera along selected axis
-            break;
-        case MModes::TargetTranslate: mouseTranslateTarget(); // translate target along selected axis
-            break;
-        case MModes::RotateCameraZ: mouseRotateCameraZ(); // rotate camera along z axis
-            break;
-        case MModes::NearPlane: mouseModifyNearPlane(); // move near plane according to difference between points
-            break;
-        case MModes::FarPlane: mouseModifyNearPlane(); // move far plane according to difference between points
-            break;
-        default:
-            break;
-        }
-    }
-    else
-    {
-        // add next vertex only if in object mode
-        // otherwise, mouse presses are irrelevant
-        if (keyboardMode == KModes::Object)
-        {
-            setNextVertex();
-        }
-    }
+    setNextVertex();
 }
 
 /*
@@ -305,16 +310,16 @@ float MyOpenGLWidget::mouseDistanceY()
 void MyOpenGLWidget::mouseTranslateObject()
 {
     std::cout << "axis: " << axis << "\ndistance: " << mouseDistanceY();
-    (*selected)->translate(mouseDistanceY()*2,axis);
+//    (*selected)->translate(mouseDistanceY()*2,axis);
 }
 void MyOpenGLWidget::mouseRotateObject()
 {
-    (*selected)->rotate(mouseDistanceY()*10,axis);
+//    (*selected)->rotate(mouseDistanceY()*10,axis);
 }
 
 void MyOpenGLWidget::mouseScaleObject()
 {
-    (*selected)->scale(mouseDistanceY()*3,axis);
+//    (*selected)->scale(mouseDistanceY()*3,axis);
 }
 
 void MyOpenGLWidget::mouseTranslateCamera()
@@ -382,20 +387,21 @@ void MyOpenGLWidget::testTriangle()
 
 void MyOpenGLWidget::setNextVertex()
 {
-    if (canAddVertex())
+    if (numVerticesChosen < 3)
     {
-        std::cout << "setting next vertex" << std::endl;
-        if (numVerticesChosen < 3)
+        GLfloat x3d = float(2*widgetX2)/width() - 1;
+        GLfloat y3d = 1 - float(2*widgetY2)/height();
+        QVector4D vertex = QVector4D(x3d,y3d,0,1);
+        QMatrix4x4 xform;
+        if (selected != world->end()) xform = (*selected)->getXform();
+        vertex = (matPerspective * matCamera * xform).inverted() * vertex;
+        qvertices[numVerticesChosen++] = vertex;
+    }
+    if (numVerticesChosen == 3)
+    {
+        if (selected != world->end())
         {
-            GLfloat x3d = float(2*widgetX2)/width() - 1;
-            GLfloat y3d = 1 - float(2*widgetY2)/height();
-            QVector4D vertex = QVector4D(x3d,y3d,0,1);
-            vertex = (matPerspective * matCamera * ((*selected)->getxform())).inverted() * vertex;
-            qvertices[numVerticesChosen++] = vertex;
-        }
-        if (numVerticesChosen == 3)
-        {
-            (*selected)->addTriangle(qvertices);
+            (*selected)->addVerticesByVector4D(qvertices, 3);
             numVerticesChosen = 0;
         }
     }
@@ -414,20 +420,20 @@ void MyOpenGLWidget::addTriangle()
 
 void MyOpenGLWidget::genericTriangle()
 {
-    if (!world->children.empty() && selected != world->end())
-    {
-        QVector4D triangle[3];
-        triangle[0] = QVector4D(-1.0,0.0,0.0,1.0);
-        triangle[1] = QVector4D(1.0,0.0,0.0,1.0);
-        triangle[2] = QVector4D(0.0,1.0,0.0,1.0);
-        (*selected)->addTriangle(triangle);
+//    if (!world->children.empty() && selected != world->end())
+//    {
+//        QVector4D triangle[3];
+//        triangle[0] = QVector4D(-1.0,0.0,0.0,1.0);
+//        triangle[1] = QVector4D(1.0,0.0,0.0,1.0);
+//        triangle[2] = QVector4D(0.0,1.0,0.0,1.0);
+//        (*selected)->addTriangle(triangle);
 
-        newTObject();
-        triangle[0] = QVector4D(0.0,0.5,0.0,1.0);
-        triangle[1] = QVector4D(1.5,0.5,0.0,1.0);
-        triangle[2] = QVector4D(0.0,-1.5,0.0,1.0);
-        (*selected)->addTriangle(triangle);
-    }
+//        newTObject();
+//        triangle[0] = QVector4D(0.0,0.5,0.0,1.0);
+//        triangle[1] = QVector4D(1.5,0.5,0.0,1.0);
+//        triangle[2] = QVector4D(0.0,-1.5,0.0,1.0);
+//        (*selected)->addTriangle(triangle);
+//    }
 }
 
 void MyOpenGLWidget::refresh() {
