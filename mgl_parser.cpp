@@ -33,8 +33,7 @@ void MGL_Parser::begin_object_geo(std::list<std::string> tokens)
     // create new TObject?
     std::string name = tokens.front(); tokens.pop_front();
     int numVertices = stoi(tokens.front()); tokens.pop_front();
-    TObject *newObject = new TObject();
-    newObject->name = name;
+    MGL_Node *newObject = new MGL_Node();
     GLfloat *vertices = new GLfloat[numVertices*4];
     for (int i = 0; i < numVertices; i++)
     {
@@ -47,7 +46,7 @@ void MGL_Parser::begin_object_geo(std::list<std::string> tokens)
         vertices[i*4 + 3] = 1.0;
     }
     // add triangles to TObject
-    newObject->addTriangles(vertices,numVertices);
+    newObject->addVerticesByArray4D(vertices,numVertices);
     // TODO: pass TObject back
     tokens.pop_front(); // remove "end_object"
 }

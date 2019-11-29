@@ -7,6 +7,7 @@
 #include <QVector4D>
 #include <tobject.h>
 #include <sobject.h>
+#include <mgl_node.h>
 
 class MGL_Parser
 {

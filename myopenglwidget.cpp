@@ -407,6 +407,7 @@ void MyOpenGLWidget::setNextVertex()
     }
 }
 
+
 bool MyOpenGLWidget::canAddVertex()
 {
     if (keyboardActivated)
@@ -416,7 +417,9 @@ bool MyOpenGLWidget::canAddVertex()
 }
 
 void MyOpenGLWidget::addTriangle()
-{}
+{
+
+}
 
 void MyOpenGLWidget::genericTriangle()
 {
