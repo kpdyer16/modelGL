@@ -15,7 +15,6 @@ struct TObject
     TObject();
     ~TObject();
 
-    GLfloat vertices[1200]; // 100 triangles = 300 vertices * 4 floats/vertex = 1200 floats
     int vertexCount = 0; // holds the number of vertices
     const int max_vertices = 300;
 

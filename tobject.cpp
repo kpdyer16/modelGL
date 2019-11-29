@@ -1,5 +1,4 @@
 #include "tobject.h"
-#include <iostream>
 
 int TObject::universal_id = 0;
 

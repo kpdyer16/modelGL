@@ -16,18 +16,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    light.cpp \
     main.cpp \
     dialog.cpp \
     mgl_node.cpp \
+    material.cpp \
+    mgl_parser.cpp \
     myopenglwidget.cpp \
+    sobject.cpp \
     tobject.cpp \
     ttransform.cpp
 
 HEADERS += \
     dialog.h \
     mgl_node.h \
+    lexer.h \
+    light.h \
+    material.h \
+    mgl_objectbuffer.h \
+    mgl_parser.h \
     mode.h \
     myopenglwidget.h \
+    rgb.h \
+    sobject.h \
     tobject.h \
     ttransform.h
 

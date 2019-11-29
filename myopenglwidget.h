@@ -74,6 +74,12 @@ protected:
 
 private:
 
+
+
+    //********************************************
+    //********************************************
+    //********************************************
+
     QMatrix4x4 matCamera, matPerspective;
     QVector3D eye, center, up;
     int nearclip = 1, farclip = 20;
