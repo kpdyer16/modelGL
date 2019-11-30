@@ -123,16 +123,6 @@ void MyOpenGLWidget::swapAxisOrder(int order)
         else
             o = 0;
     }
-//    if (!keyboardActivated)
-//    {
-//        if (mouseMode > MModes::Neutral && mouseMode < MModes::CameraTranslate)
-//            (*selected)->setRotationAxisOrder();
-//    }
-//    else
-//    {
-//        if (keyboardMode == KModes::Object)
-//            (*selected)->setRotationAxisOrder();
-//    }
 }
 
 void MyOpenGLWidget::swapTransformOrder(int order)
@@ -146,16 +136,6 @@ void MyOpenGLWidget::swapTransformOrder(int order)
         else
             o = 0;
     }
-//    if (!keyboardActivated)
-//    {
-//        if (mouseMode > MModes::Neutral && mouseMode < MModes::CameraTranslate)
-//            (*selected)->swapAxisOrder();
-//    }
-//    else
-//    {
-//        if (keyboardMode == KModes::Object)
-//            (*selected)->swapAxisOrder();
-//    }
 }
 
 void MyOpenGLWidget::selectNext()
@@ -219,27 +199,6 @@ void MyOpenGLWidget::paintGL()
             renderTree(*it, identity, QVector4D(1.0,1.0,1.0,1.0));
         }
     }
-
-    /*
-    QMatrix4x4 identity;
-    for (auto object: world->children)
-    {
-        int color = 0;
-        if (object == *selected)
-        {
-            color = colorSetting ? 1 : 0;
-        }
-        else if (object == *aux)
-        {
-            color = colorSetting ? 2 : 0;
-        }
-        else
-        {
-//            std::cout << "Not selected\nobject: " << object
-//                      << "selected: " << *selected << std::endl;
-        }
-        object->render(pShaderProgram,matPerspective,matCamera,identity,color);
-    } */
 }
 
 void MyOpenGLWidget::renderTree(MGL_Node *node, const QMatrix4x4 &transform, const QVector4D &color)
@@ -297,73 +256,10 @@ void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent *ev) {
     setNextVertex();
 }
 
-/*
- * MOUSE CONTROLS
- * KEYBOARD IS INACTIVE
-*/
 
 float MyOpenGLWidget::mouseDistanceY()
 {
     return float(widgetY2 - widgetY1) / height();
-}
-
-void MyOpenGLWidget::mouseTranslateObject()
-{
-    std::cout << "axis: " << axis << "\ndistance: " << mouseDistanceY();
-//    (*selected)->translate(mouseDistanceY()*2,axis);
-}
-void MyOpenGLWidget::mouseRotateObject()
-{
-//    (*selected)->rotate(mouseDistanceY()*10,axis);
-}
-
-void MyOpenGLWidget::mouseScaleObject()
-{
-//    (*selected)->scale(mouseDistanceY()*3,axis);
-}
-
-void MyOpenGLWidget::mouseTranslateCamera()
-{
-    switch(axis)
-    {
-    case 0: eye += QVector3D(mouseDistanceY()*3.0,0,0);
-        break;
-    case 1: eye += QVector3D(0,mouseDistanceY()*3.0,0);
-        break;
-    case 2: eye += QVector3D(0,0,mouseDistanceY()*3.0);
-        break;
-    }
-    calculateCameraMatrix();
-}
-
-void MyOpenGLWidget::mouseTranslateTarget()
-{
-    switch(axis)
-    {
-    case 0: center += QVector3D(mouseDistanceY()*3.0,0,0);
-        break;
-    case 1: center += QVector3D(0,mouseDistanceY()*3.0,0);
-        break;
-    case 2: center += QVector3D(0,0,mouseDistanceY()*3.0);
-        break;
-    }
-    calculateCameraMatrix();
-}
-
-void MyOpenGLWidget::mouseRotateCameraZ()
-{
-
-}
-
-void MyOpenGLWidget::mouseModifyNearPlane()
-{
-    nearclip += (mouseDistanceY()*10);
-    std::cout << nearclip << std::endl;
-}
-
-void MyOpenGLWidget::mouseModifyFarPlane()
-{
-    farclip += mouseDistanceY();
 }
 
 void MyOpenGLWidget::calculateCameraMatrix()
@@ -378,11 +274,6 @@ void MyOpenGLWidget::resetCamera()
     center = QVector3D(0,0,0);
     up = QVector3D(0,1,0);
     calculateCameraMatrix();
-}
-
-
-void MyOpenGLWidget::testTriangle()
-{
 }
 
 void MyOpenGLWidget::setNextVertex()
@@ -408,35 +299,22 @@ void MyOpenGLWidget::setNextVertex()
 }
 
 
+// TODO: decide if this is useful
 bool MyOpenGLWidget::canAddVertex()
 {
-    if (keyboardActivated)
-        return keyboardMode == KModes::Object;
-    else
-        return mouseMode == MModes::Select;
-}
-
-void MyOpenGLWidget::addTriangle()
-{
-
+    return false;
 }
 
 void MyOpenGLWidget::genericTriangle()
 {
-//    if (!world->children.empty() && selected != world->end())
-//    {
-//        QVector4D triangle[3];
-//        triangle[0] = QVector4D(-1.0,0.0,0.0,1.0);
-//        triangle[1] = QVector4D(1.0,0.0,0.0,1.0);
-//        triangle[2] = QVector4D(0.0,1.0,0.0,1.0);
-//        (*selected)->addTriangle(triangle);
-
-//        newTObject();
-//        triangle[0] = QVector4D(0.0,0.5,0.0,1.0);
-//        triangle[1] = QVector4D(1.5,0.5,0.0,1.0);
-//        triangle[2] = QVector4D(0.0,-1.5,0.0,1.0);
-//        (*selected)->addTriangle(triangle);
-//    }
+    if (!(world->size() == 0) && selected != world->end())
+    {
+        QVector4D triangle[3];
+        triangle[0] = QVector4D(-1.0,0.0,0.0,1.0);
+        triangle[1] = QVector4D(1.0,0.0,0.0,1.0);
+        triangle[2] = QVector4D(0.0,1.0,0.0,1.0);
+        (*selected)->addVerticesByVector4D(triangle, 3);
+    }
 }
 
 void MyOpenGLWidget::refresh() {

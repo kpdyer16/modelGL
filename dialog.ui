@@ -28,6 +28,19 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
+           <widget class="QLabel" name="label">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Status</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="clearButton">
             <property name="text">
              <string>Clear</string>
@@ -236,13 +249,6 @@
            <widget class="QPushButton" name="addTriangle">
             <property name="text">
              <string>Add Generic Triangle</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="keyBoardCheckBox">
-            <property name="text">
-             <string>Keyboard Controls</string>
             </property>
            </widget>
           </item>

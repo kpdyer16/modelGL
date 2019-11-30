@@ -44,19 +44,19 @@ Dialog::~Dialog()
 void Dialog::on_clearButton_clicked()
 {
     ui->openGLWidget->clearObjects();
+    ui->label->setText("Objects cleared!");
 }
 
 void Dialog::on_newObjectButton_clicked()
 {
     ui->openGLWidget->newNode();
+    ui->label->setText("New node generated");
 }
 
 void Dialog::on_selectObjectButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::Select);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::Object);
+    // TODO: redo this function
+    ui->label->setText("Click an object to select it");
 }
 
 void Dialog::on_selectNextButton_clicked()
@@ -71,10 +71,7 @@ void Dialog::on_selectPreviousButton_clicked()
 
 void Dialog::on_translateObjectButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::Translate);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::Object);
+    // TODO: redo this function
 }
 
 void Dialog::on_parentButton_clicked()
@@ -84,18 +81,12 @@ void Dialog::on_parentButton_clicked()
 
 void Dialog::on_rotateButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::Rotate);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::Object);
+    // TODO: redo this function
 }
 
 void Dialog::on_scaleButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::Scale);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::Object);
+    // TODO: redo this function
 }
 
 void Dialog::on_xAxisRadioButton_toggled(bool checked)
@@ -134,42 +125,27 @@ void Dialog::on_swapAxisButton_clicked()
 
 void Dialog::on_translateCameraButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::CameraTranslate);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::CameraTranslate);
+    // TODO: redo this function
 }
 
 void Dialog::on_translateTargetButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::TargetTranslate);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::TargetTranslate);
+    // TODO: redo this function
 }
 
 void Dialog::on_rotateCameraZButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::RotateCameraZ);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::CameraZ);
+    // TODO: redo this function
 }
 
 void Dialog::on_nearPlaneButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::NearPlane);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::NearPlane);
+    // TODO: redo this function
 }
 
 void Dialog::on_farPlaneButton_clicked()
 {
-    if (!ui->openGLWidget->keyboardIsActivated())
-        ui->openGLWidget->setMouseMode(MModes::FarPlane);
-    else
-        ui->openGLWidget->setKeyboardMode(KModes::FarPlane);
+    // TODO: redo this function
 }
 
 void Dialog::on_resetCameraButton_clicked()
@@ -180,14 +156,6 @@ void Dialog::on_resetCameraButton_clicked()
 void Dialog::on_addTriangle_clicked()
 {
     ui->openGLWidget->genericTriangle();
-}
-
-void Dialog::on_keyBoardCheckBox_stateChanged(int arg1)
-{
-    if (arg1 == 0)
-        ui->openGLWidget->activateKeyboard(false);
-    else
-        ui->openGLWidget->activateKeyboard(true);
 }
 
 void Dialog::refresh()

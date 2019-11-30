@@ -25,7 +25,7 @@ public:
     void refresh();
 
 
-    void newNode(); // creates new TObject and selects it
+    void newNode(); // creates new node and selects it
     void deleteSelected();
     void makeParentOf();
     void clearObjects();
@@ -44,6 +44,8 @@ public:
     void selectNext();
     void selectPrevious();
 
+
+
     // interface for transforming the world
     void genericTriangle();
     void translateWorld(float,float,float);
@@ -57,28 +59,14 @@ protected:
 
 
     // uses saved mouse click values
-    void setNextVertex();        // add a point
-
-    // MOUSE CONTROLS
-    void mouseTranslateObject(); // operates on selected object
-    void mouseRotateObject();    // ""
-    void mouseScaleObject();     // ""
-    void mouseTranslateCamera(); // translate eye position
-    void mouseTranslateTarget(); // translate center
-    void mouseRotateCameraZ();   // rotate up vector
-    void mouseModifyNearPlane();
-    void mouseModifyFarPlane();
+    void setNextVertex();
 
     float mouseDistanceY();
     void calculateCameraMatrix();
 
 private:
+    // raytracing functions
 
-
-
-    //********************************************
-    //********************************************
-    //********************************************
 
     QMatrix4x4 matCamera, matPerspective;
     QVector3D eye, center, up;
@@ -94,10 +82,6 @@ private:
 
     // when true, selected is red and aux (if it points to a child) is dark blue
     bool colorSetting = false;
-
-
-    int mouseMode = 0;
-    int keyboardMode = 0;
 
     // rendering
     QOpenGLVertexArrayObject *pVao;
@@ -117,8 +101,6 @@ private:
     int axis = 0;
 
     // helper functions
-    void addTriangle();
-    void testTriangle();
     bool canAddVertex();
 };
 

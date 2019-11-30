@@ -111,30 +111,59 @@ void MGL_Node::translateAlongZ(float z)
 //- rotate ( modifies ttransform)
 void MGL_Node::rotateOverX(float x)
 {
-
+    static QVector3D x_axis(1.0,0.0,0.0);
+    xform->mat_rotateX.rotate(x,x_axis);
 }
 void MGL_Node::rotateOverY(float y)
 {
-
+    static QVector3D y_axis(0.0,1.0,0.0);
+    xform->mat_rotateY.rotate(y,y_axis);
 }
 void MGL_Node::rotateOverZ(float z)
 {
-
+    static QVector3D z_axis(0.0,1.0,0.0);
+    xform->mat_rotateY.rotate(z,z_axis);
 }
 
 //- scale ( modifies ttransform)
+void MGL_Node::scaleAll(float x, float y, float z)
+{
+    scaleX(x);
+    scaleY(y);
+    scaleZ(z);
+}
 void MGL_Node::scaleX(float x)
 {
-
+    xform->scaleFactorX *= x;
 }
 void MGL_Node::scaleY(float y)
 {
-
+    xform->scaleFactorY *= y;
 }
 void MGL_Node::scaleZ(float z)
 {
-
+    xform->scaleFactorZ *= z;
 }
+
+void MGL_Node::scaleLinearAll(float x, float y, float z)
+{
+    scaleLinearX(x);
+    scaleLinearY(y);
+    scaleLinearZ(z);
+}
+void MGL_Node::scaleLinearX(float x)
+{
+    xform->scaleFactorX += x;
+}
+void MGL_Node::scaleLinearY(float y)
+{
+    xform->scaleFactorY += y;
+}
+void MGL_Node::scaleLinearZ(float z)
+{
+    xform->scaleFactorZ += z;
+}
+
 
 //- set transform order ( modifies ttransform)
 void MGL_Node::setXformOrder(int order)

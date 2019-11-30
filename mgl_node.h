@@ -34,10 +34,10 @@ public:
     void scaleX(float x);
     void scaleY(float y);
     void scaleZ(float z);
+    void scaleLinearAll(float x, float y, float z);
     void scaleLinearX(float x);
     void scaleLinearY(float y);
     void scaleLinearZ(float z);
-    void scaleLinearAll(float x, float y, float z);
 
     //- set transform order ( modifies ttransform)
     void setXformOrder(int order);

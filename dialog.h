@@ -59,8 +59,6 @@ private slots:
 
     void on_addTriangle_clicked();
 
-    void on_keyBoardCheckBox_stateChanged(int arg1);
-
     void refresh();
 private:
     Ui::Dialog *ui;
