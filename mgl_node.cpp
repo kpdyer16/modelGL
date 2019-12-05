@@ -95,75 +95,93 @@ void MGL_Node::translateOnAllAxes(float x, float y, float z)
 {
     xform->mat_translate.translate(x,y,z);
 }
-void MGL_Node::translateAlongX(float x)
+
+void MGL_Node::translate(float factor, int axis)
 {
-    xform->mat_translate.translate(x,0.0,0.0);
-}
-void MGL_Node::translateAlongY(float y)
-{
-    xform->mat_translate.translate(0.0,y,0.0);
-}
-void MGL_Node::translateAlongZ(float z)
-{
-    xform->mat_translate.translate(0.0,0.0,z);
+    switch(axis)
+    {
+    case 0: xform->mat_translate.translate(factor,0.0,0.0);
+        break;
+    case 1: xform->mat_translate.translate(0.0,factor,0.0);
+        break;
+    case 2: xform->mat_translate.translate(0.0,0.0,factor);
+        break;
+    }
 }
 
 //- rotate ( modifies ttransform)
 void MGL_Node::rotateOverX(float x)
 {
     static QVector3D x_axis(1.0,0.0,0.0);
-    xform->mat_rotateX.rotate(x,x_axis);
+    xform->mat_rotateX.rotate(2*x,x_axis);
+    xform->calculateRotationMatrix();
 }
 void MGL_Node::rotateOverY(float y)
 {
     static QVector3D y_axis(0.0,1.0,0.0);
-    xform->mat_rotateY.rotate(y,y_axis);
+    xform->mat_rotateY.rotate(2*y,y_axis);
+    xform->calculateRotationMatrix();
 }
 void MGL_Node::rotateOverZ(float z)
 {
-    static QVector3D z_axis(0.0,1.0,0.0);
-    xform->mat_rotateY.rotate(z,z_axis);
+    static QVector3D z_axis(0.0,0.0,1.0);
+    xform->mat_rotateY.rotate(2*z,z_axis);
+    xform->calculateRotationMatrix();
+}
+
+void MGL_Node::rotate(float factor, int axis)
+{
+    switch(axis)
+    {
+    case 0: rotateOverX(factor);
+        break;
+    case 1: rotateOverY(factor);
+        break;
+    case 2: rotateOverZ(factor);
+        break;
+    }
 }
 
 //- scale ( modifies ttransform)
 void MGL_Node::scaleAll(float x, float y, float z)
 {
-    scaleX(x);
-    scaleY(y);
-    scaleZ(z);
-}
-void MGL_Node::scaleX(float x)
-{
     xform->scaleFactorX *= x;
-}
-void MGL_Node::scaleY(float y)
-{
     xform->scaleFactorY *= y;
-}
-void MGL_Node::scaleZ(float z)
-{
     xform->scaleFactorZ *= z;
+}
+
+void MGL_Node::scale(float factor, int axis)
+{
+    switch(axis)
+    {
+    case 0: xform->scaleFactorX *= factor;
+        break;
+    case 1: xform->scaleFactorY *= factor;
+        break;
+    case 2: xform->scaleFactorZ *= factor;
+        break;
+    }
 }
 
 void MGL_Node::scaleLinearAll(float x, float y, float z)
 {
-    scaleLinearX(x);
-    scaleLinearY(y);
-    scaleLinearZ(z);
-}
-void MGL_Node::scaleLinearX(float x)
-{
     xform->scaleFactorX += x;
-}
-void MGL_Node::scaleLinearY(float y)
-{
     xform->scaleFactorY += y;
-}
-void MGL_Node::scaleLinearZ(float z)
-{
     xform->scaleFactorZ += z;
 }
 
+void MGL_Node::scaleLinear(float factor, int axis)
+{
+    switch(axis)
+    {
+    case 0: xform->scaleFactorX += factor;
+        break;
+    case 1: xform->scaleFactorY += factor;
+        break;
+    case 2: xform->scaleFactorZ += factor;
+        break;
+    }
+}
 
 //- set transform order ( modifies ttransform)
 void MGL_Node::setXformOrder(int order)
@@ -238,14 +256,63 @@ GLfloat* MGL_Node::getTriangleArray()
 {
     return obj->vertices;
 }
-int MGL_Node::getVertexCount()
+int MGL_Node::getVertexCountLocal() const
 {
     return obj->vertexCount;
 }
 
+int MGL_Node::getVertexCountRecursive() const
+{
+    int count = 0;
+    for (auto node: children)
+    {
+        count += node->getVertexCountRecursive();
+    }
+    return count + getVertexCountLocal();
+}
+
+int MGL_Node::fillRaw(float *arr) const
+{
+    float *vt = obj->vertices;
+    int vcount = getVertexCountLocal();
+
+    for (int i = 0; i < vcount; i++)
+    {
+        QVector4D old = QVector4D(vt[i*4],vt[i*4+1],
+                                vt[i*4+2],vt[i*4+3]);
+        old = getXform() * old; // apply transformations
+        arr[i*3] = old.x();
+        arr[i*3+1] = old.y();
+        arr[i*3+2] = old.z();
+    }
+
+    for (auto &obj: children)
+    {
+        vcount += obj->fillRaw(arr+(vcount*3));
+    }
+    return vcount;
+}
+
 //- return local transform (ttransform)
-QMatrix4x4 MGL_Node::getXform()
+QMatrix4x4 MGL_Node::getXform() const
 {
     return xform->transformMatrix();
 }
 
+int getCenterHelper(const MGL_Node *node, float &xavg, float &yavg,
+                    float &zavg, int numVertices)
+{
+
+}
+
+QVector3D MGL_Node::getCenter() const
+{
+    // calculate average for each point
+    float x,y,z;
+
+}
+
+float MGL_Node::getRadius() const
+{
+
+}

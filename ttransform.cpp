@@ -45,18 +45,17 @@ void TTransform::setTransformOrder(int order)
 }
 void TTransform::setRotationAxisOrder(int order)
 {
-    // 6 possible permutations
-    // xyz
-    // xzy
-    // zxy
-    // yxz
-    // yzx
-    // zyx
-    switch(order)
+    axisOrder = order < 6 && order >= 0 ? order : 0;
+    calculateRotationMatrix();
+}
+
+void TTransform::calculateRotationMatrix()
+{
+    switch(axisOrder)
     {
     case 0: mat_rotate = mat_rotateZ * mat_rotateY * mat_rotateX;
         break;
-    case 1: mat_rotate =  mat_rotateY * mat_rotateZ * mat_rotateX;
+    case 1: mat_rotate = mat_rotateY * mat_rotateZ * mat_rotateX;
         break;
     case 2: mat_rotate = mat_rotateY * mat_rotateX * mat_rotateZ;
         break;

@@ -13,6 +13,55 @@ MyOpenGLWidget::~MyOpenGLWidget()
     delete world;
 }
 
+void MyOpenGLWidget::setMode(Mode::mode mode)
+{
+    if (mode == Mode::selection)
+    {
+        selected = aux = world->end();
+    }
+    m = mode;
+}
+
+void MyOpenGLWidget::transformSelected(float factor)
+{
+    if (selected != world->end())
+    {
+        switch(m)
+        {
+        case Mode::triangles:
+        case Mode::selection: // do nothing
+            break;
+        case Mode::translate: (*selected)->translate(factor,axis);
+            break;
+        case Mode::rotate: (*selected)->rotate(20*factor,axis);
+            break;
+        case Mode::scale: (*selected)->scaleLinear(factor,axis); // might set a setting for this?
+            break;
+        case Mode::translateCam:
+            if (axis == 0) eye += QVector3D(factor,0.0,0.0);
+            else if (axis == 1) eye += QVector3D(0.0,factor,0.0);
+            else eye += QVector3D(0.0,0.0,factor);
+            calculateCameraMatrix();
+            break;
+        case Mode::translateTarget:
+            if (axis == 0) center += QVector3D(factor,0.0,0.0);
+            else if (axis == 1) center += QVector3D(0.0,factor,0.0);
+            else center += QVector3D(0.0,0.0,factor);
+            calculateCameraMatrix();
+            break;
+        case Mode::rotateCameraZ:
+            break;
+        case Mode::nearclip: nearclip += factor;
+            if (factor != 0.0) std::cout << nearclip << std::endl;
+            resizeGL(width(),height());
+            break;
+        case Mode::farclip: farclip += factor;
+            if (factor != 0.0) std::cout << farclip << std::endl;
+            resizeGL(width(),height());
+        }
+    }
+}
+
 void MyOpenGLWidget::newNode()
 {
     world->spawnChild();          // add it to the top level of our tree
@@ -61,51 +110,6 @@ void MyOpenGLWidget::clearObjects()
     std::cout << "objects cleared!" << std::endl;
 }
 
-void MyOpenGLWidget::activateKeyboard(bool activate)
-{
-    keyboardActivated = activate;
-    mouseMode = MModes::Neutral;
-    keyboardMode = KModes::Neutral;
-}
-
-void MyOpenGLWidget::setKeyboardMode(int m)
-{
-    if (m == KModes::Object)
-    {
-        colorSetting = true;
-        keyboardMode = m;
-    }
-    else if (m > KModes::Object && m <= KModes::FarPlane)
-    {
-        colorSetting = false;
-        keyboardMode = m;
-    }
-    else
-    {
-        colorSetting = false;
-        keyboardMode = KModes::Neutral;
-    }
-}
-
-void MyOpenGLWidget::setMouseMode(int m)
-{
-    if (m > MModes::Neutral && m < MModes::CameraTranslate)
-    {
-        colorSetting = true;
-        mouseMode = m;
-    }
-    else if (m <= MModes::FarPlane)
-    {
-        colorSetting = false;
-        mouseMode = m;
-    }
-    else
-    {
-        colorSetting = false;
-        mouseMode = MModes::Neutral;
-    }
-}
-
 void MyOpenGLWidget::setAxis(int a)
 {
     if (a >= 0 && a < 3)
@@ -119,7 +123,7 @@ void MyOpenGLWidget::swapAxisOrder(int order)
     {
         (*selected)->setRotationAxisOrder(o);
         if (o == 0)
-            o = 1;
+            o = 3;
         else
             o = 0;
     }
@@ -204,7 +208,7 @@ void MyOpenGLWidget::paintGL()
 void MyOpenGLWidget::renderTree(MGL_Node *node, const QMatrix4x4 &transform, const QVector4D &color)
 {
     // render triangles in the current object
-    int vertexCount = node->getVertexCount();
+    int vertexCount = node->getVertexCountLocal();
     GLfloat *vertices = node->getTriangleArray();
     QMatrix4x4 t = transform * node->getXform();
 
@@ -242,6 +246,7 @@ void MyOpenGLWidget::resizeGL(int w, int h)
     matPerspective.setToIdentity();// mat is a QMatrix4x4 object
     int fovy = 60;
     matPerspective.perspective(fovy, GLfloat(w)/GLfloat(h), nearclip,farclip);
+    std::cout << "width: " << w << "\nheight: " << h << std::endl;
 }
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent *ev) {
@@ -253,7 +258,116 @@ void MyOpenGLWidget::mousePressEvent(QMouseEvent *ev) {
 void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent *ev) {
     widgetX2 = ev->x();
     widgetY2 = ev->y();
-    setNextVertex();
+
+    // either selects an object or adds a vertex
+    if (m == Mode::selection)
+    {
+        // emit ray and select the nearest visible intersecting object
+        Ray r = eyeToPixelRay(widgetX2,widgetY2);
+
+        // detect collision with objects
+        int vcount = world->getVertexCountRecursive(), objIndex = 0;
+        float *vertices = new float[vcount*3];
+        std::vector<int> objIndices;
+
+        for (auto i = world->begin(); i != world->end(); i++)
+        {
+            objIndices.push_back(objIndex);
+            objIndex += 3 * (*i)->fillRaw(vertices+objIndex);
+        }
+
+        for (int i = 0; i < vcount; i++)
+        {
+            std::cout << "vertices: " << vertices[i*3] <<
+                  " " << vertices[i*3+1] <<
+                  " " << vertices[i*3+2] << std::endl;
+        }
+
+        auto idx = objIndices.begin();
+        float bestT = farclip;
+        for (auto node = world->begin(); node != world->end(); node++, idx++)
+        {
+            float t1 = -1.0, t2 = -1.0;
+            std::cout << (*node)->getVertexCountRecursive() << " vcount" << std::endl;
+            std::cout << "idx " << *idx << std::endl;
+            if (r.intersectsBoundingSphere(vertices+*idx,(*node)->getVertexCountRecursive(),t1,t2))
+            {
+                std::cout << "t1 " << t1 << " t2 " << t2 << std::endl;
+                if (t1 < 0.0 && t2 < 0.0)
+                { /* do not select */ }
+                else if (t1 < 0.0) // t2 >= 0.0
+                {
+                    if (t2 < bestT)
+                    {
+                        bestT = t2;
+                        selected = node;
+                    }
+                }
+                else if (t2 < 0.0) // t1 >= 0.0
+                {
+                    if (t1 < bestT)
+                    {
+                        bestT = t1;
+                        selected = node;
+                    }
+                }
+                else
+                {
+                    if (t1 < bestT)
+                    {
+                        bestT = t2 < t1 ? t2 : t1;
+                        selected = node;
+                    }
+                }
+
+            }
+            else
+            {
+                std::cout << "does not intersect" << std::endl;
+            }
+        }
+
+        std::cout << std::endl;
+        delete [] vertices;
+    }
+    else
+    {
+        // relatively safe. checks if an object is selected
+        setNextVertex();
+    }
+}
+
+
+void MyOpenGLWidget::saveRayTracedImage()
+{
+    for (int y = 0; y < height(); y++)
+    {
+        for (int x = 0; x < width(); x++)
+        {
+            // create a ray
+
+            // trace ray
+
+        }
+    }
+}
+
+void MyOpenGLWidget::convertPixel(double &x, double &y) const
+{
+    std::cout << "x: " << x << " y: " << y << std::endl;
+    x = double(2*x)/width() - 1;
+    y = 1 - double(2*y)/height();
+    std::cout << "x: " << x << " y: " << y << std::endl;
+}
+
+Ray MyOpenGLWidget::eyeToPixelRay(int xInt, int yInt) const
+{
+    double x = xInt, y = yInt; // convert to floats
+    convertPixel(x,y);
+    QVector4D p(x,y,0,0);
+    p = matCamera.inverted() * p;
+    QVector3D D = (p.toVector3D() - eye).normalized();
+    return Ray(eye,D);
 }
 
 
@@ -270,7 +384,7 @@ void MyOpenGLWidget::calculateCameraMatrix()
 
 void MyOpenGLWidget::resetCamera()
 {
-    eye = QVector3D(0,0,-10);
+    eye = QVector3D(0,0,-5);
     center = QVector3D(0,0,0);
     up = QVector3D(0,1,0);
     calculateCameraMatrix();
@@ -278,23 +392,29 @@ void MyOpenGLWidget::resetCamera()
 
 void MyOpenGLWidget::setNextVertex()
 {
-    if (numVerticesChosen < 3)
+    if (selected != world->end())
     {
-        GLfloat x3d = float(2*widgetX2)/width() - 1;
-        GLfloat y3d = 1 - float(2*widgetY2)/height();
-        QVector4D vertex = QVector4D(x3d,y3d,0,1);
-        QMatrix4x4 xform;
-        if (selected != world->end()) xform = (*selected)->getXform();
-        vertex = (matPerspective * matCamera * xform).inverted() * vertex;
-        qvertices[numVerticesChosen++] = vertex;
-    }
-    if (numVerticesChosen == 3)
-    {
-        if (selected != world->end())
+        if (numVerticesChosen < 3)
+        {
+            GLfloat x3d = float(2*widgetX2)/width() - 1;
+            GLfloat y3d = 1 - float(2*widgetY2)/height();
+            QVector4D vertex = QVector4D(x3d,y3d,0,1);
+            QMatrix4x4 xform;
+            if (selected != world->end()) xform = (*selected)->getXform();
+            vertex = (matPerspective * matCamera * xform).inverted() * vertex;
+            float x = vertex.x(), y = vertex.y(), z = vertex.z(), w = vertex.w();
+            vertex.setX(x/w); vertex.setY(y/w); vertex.setZ(z/w); vertex.setW(1.0);
+            qvertices[numVerticesChosen++] = vertex;
+        }
+        if (numVerticesChosen == 3)
         {
             (*selected)->addVerticesByVector4D(qvertices, 3);
             numVerticesChosen = 0;
         }
+    }
+    else
+    {
+        numVerticesChosen = 0;
     }
 }
 
@@ -310,9 +430,10 @@ void MyOpenGLWidget::genericTriangle()
     if (!(world->size() == 0) && selected != world->end())
     {
         QVector4D triangle[3];
-        triangle[0] = QVector4D(-1.0,0.0,0.0,1.0);
-        triangle[1] = QVector4D(1.0,0.0,0.0,1.0);
-        triangle[2] = QVector4D(0.0,1.0,0.0,1.0);
+        triangle[0] = (matPerspective * matCamera).inverted() * QVector4D(-0.125,0.0,0.0,1.0);
+        triangle[1] = (matPerspective * matCamera).inverted() * QVector4D(0.125,0.0,0.0,1.0);
+        triangle[2] = (matPerspective * matCamera).inverted() * QVector4D(0.0,0.125,0.0,1.0);
+
         (*selected)->addVerticesByVector4D(triangle, 3);
     }
 }

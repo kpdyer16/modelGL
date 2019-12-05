@@ -58,7 +58,7 @@ void MGL_Parser::sphere_geo(std::list<std::string> tokens)
     float x = stof(tokens.front()); tokens.pop_front();
     float y = stof(tokens.front()); tokens.pop_front();
     float z = stof(tokens.front()); tokens.pop_front();
-    // translate sphere by xyz vector (?)
+    // translate sphere by xyz list (?)
 
     float radius = stof(tokens.front()); tokens.pop_front();
 
@@ -82,7 +82,7 @@ std::list<std::string> MGL_Parser::lex(const std::string filename)
 
     std::ifstream inputFile(filename);
     if (!inputFile.is_open())
-        return tokens; // return empty tokens vector
+        return tokens; // return empty tokens list
 
     for (std::string line; inputFile >> line; )
     {

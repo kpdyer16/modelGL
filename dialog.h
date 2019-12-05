@@ -16,6 +16,11 @@ public:
     Dialog(QWidget *parent = nullptr);
     ~Dialog();
 
+
+protected:
+    void keyPressEvent(QKeyEvent *) override;
+    void keyReleaseEvent(QKeyEvent *) override;
+
 private slots:
     void on_clearButton_clicked();
 

@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QSurfaceFormat>
+#include <raytracer.h>
 
 int main(int argc, char *argv[])
 {
@@ -12,7 +13,6 @@ int main(int argc, char *argv[])
     mSurfaceFormat.setVersion(4,0);
     mSurfaceFormat.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(mSurfaceFormat);
-
 
     QApplication a(argc, argv);
     Dialog w;

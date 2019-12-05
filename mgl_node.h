@@ -3,6 +3,7 @@
 
 #include <tobject.h>
 #include <ttransform.h>
+#include <ray.h>
 
 class MGL_Node
 {
@@ -20,24 +21,19 @@ public:
 
     //- translate ( modifies ttransform)
     void translateOnAllAxes(float x, float y, float z);
-    void translateAlongX(float x);
-    void translateAlongY(float y);
-    void translateAlongZ(float z);
+    void translate(float factor, int axis);
 
     //- rotate ( modifies ttransform)
     void rotateOverX(float x);
     void rotateOverY(float y);
     void rotateOverZ(float z);
+    void rotate(float factor, int axis);
 
     //- scale ( modifies ttransform)
     void scaleAll(float x, float y, float z);
-    void scaleX(float x);
-    void scaleY(float y);
-    void scaleZ(float z);
+    void scale(float factor, int axis);
     void scaleLinearAll(float x, float y, float z);
-    void scaleLinearX(float x);
-    void scaleLinearY(float y);
-    void scaleLinearZ(float z);
+    void scaleLinear(float factor, int axis);
 
     //- set transform order ( modifies ttransform)
     void setXformOrder(int order);
@@ -62,17 +58,29 @@ public:
 
     //- return constant triangle array (tobject)
     GLfloat* getTriangleArray();
-    int getVertexCount();
+    int getVertexCountLocal() const;
+    int getVertexCountRecursive() const;
 
     //- return local transform (ttransform)
-    QMatrix4x4 getXform(); // returns multiplied matrix
+    QMatrix4x4 getXform() const; // returns multiplied matrix
 
     size_t size() { return children.size(); }
     std::list<MGL_Node *> getChildren() const { return children; }
+
+    QVector3D getCenter() const;
+    float getRadius() const;
+
+
+    int fillRaw(float *arr) const;
 private:
     TObject *obj;
     TTransform *xform;
     std::list<MGL_Node *> children;
+
+    // optimization:
+    // recalculate averages (for center of bounding sphere
+//    int averageDivisor;
+//    float avgX, avgY, avgZ;
 };
 
 #endif // MGL_NODE_H

@@ -10,10 +10,12 @@
 #include <QOpenGLShaderProgram>
 #include <QMouseEvent>
 #include <QWidget>
+#include <QLabel>
 #include <iostream>
 #include "mode.h"
 
 #include <mgl_node.h>
+#include <ray.h>
 
 class MyOpenGLWidget : public QOpenGLWidget, public QOpenGLFunctions_4_0_Core
 {
@@ -24,16 +26,13 @@ public:
 
     void refresh();
 
+    void setMode(Mode::mode mode);
+    void transformSelected(float factor);
 
     void newNode(); // creates new node and selects it
     void deleteSelected();
     void makeParentOf();
     void clearObjects();
-
-    void activateKeyboard(bool);
-    bool keyboardIsActivated() {return keyboardActivated;}
-    void setMouseMode(int mode);
-    void setKeyboardMode(int mode);
 
     void setAxis(int axis);
     void swapTransformOrder(int order);
@@ -44,7 +43,14 @@ public:
     void selectNext();
     void selectPrevious();
 
+    /* NEW: ray generation and ray tracing */
+    void saveRayTracedImage(); // generates raytraced image and saves it to local directory
+    void convertPixel(double &x, double &y) const; // modifies x and y
+    Ray eyeToPixelRay(int x, int y) const;
 
+    /* end of ray tracing functions */
+
+    void setStatusBar(QLabel *s) { statusBar = s; }
 
     // interface for transforming the world
     void genericTriangle();
@@ -65,12 +71,11 @@ protected:
     void calculateCameraMatrix();
 
 private:
-    // raytracing functions
-
+    Mode::mode m;
 
     QMatrix4x4 matCamera, matPerspective;
     QVector3D eye, center, up;
-    int nearclip = 1, farclip = 20;
+    float nearclip = 1, farclip = 20;
 
     // empty TObject to manage user-created objects
     // all newly created objects are children of worldObject
@@ -102,6 +107,8 @@ private:
 
     // helper functions
     bool canAddVertex();
+
+    QLabel *statusBar;
 };
 
 #endif // MYOPENGLWIDGET_H

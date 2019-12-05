@@ -23,6 +23,8 @@ SOURCES += \
     material.cpp \
     mgl_parser.cpp \
     myopenglwidget.cpp \
+    ray.cpp \
+    raytracer.cpp \
     sobject.cpp \
     tobject.cpp \
     ttransform.cpp
@@ -37,6 +39,8 @@ HEADERS += \
     mgl_parser.h \
     mode.h \
     myopenglwidget.h \
+    ray.h \
+    raytracer.h \
     rgb.h \
     sobject.h \
     tobject.h \

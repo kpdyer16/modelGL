@@ -12,6 +12,7 @@ struct TTransform
 
     void setRotationAxisOrder(int order); // recalculates mat_rotate
     void setTransformOrder(int order);
+    void calculateRotationMatrix();
 
     float scaleFactorX, scaleFactorY, scaleFactorZ;
     QMatrix4x4 mat_translate;
