@@ -1,11 +1,11 @@
 #ifndef RGB_H
 #define RGB_H
 
-struct RGB
+struct Color
 {
     float R,B,G;
-    RGB() : RGB(1.0,1.0,1.0) {}
-    RGB(float r, float b, float g) : R(r), B(b), G(g) {}
+    Color() : Color(1.0,1.0,1.0) {}
+    Color(float r, float b, float g) : R(r), B(b), G(g) {}
 };
 
 #endif // RGB_H

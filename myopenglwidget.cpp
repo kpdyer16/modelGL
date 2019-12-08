@@ -1,5 +1,6 @@
 #include "myopenglwidget.h"
 #include <iostream>
+#include <rgb.h>
 
 MyOpenGLWidget::MyOpenGLWidget(QWidget *parent)
 {   
@@ -245,14 +246,33 @@ void MyOpenGLWidget::resizeGL(int w, int h)
 {
     matPerspective.setToIdentity();// mat is a QMatrix4x4 object
     int fovy = 60;
-    matPerspective.perspective(fovy, GLfloat(w)/GLfloat(h), nearclip,farclip);
-    std::cout << "width: " << w << "\nheight: " << h << std::endl;
+    matPerspective.perspective(fovy, float(w)/float(h), nearclip,farclip);
+//    float *data = matPerspective.data();
+//    for (int i = 0; i < 4; i++)
+//    {
+//        for (int j = 0; j < 4; j++)
+//        {
+//            std::cout << data[i*4+j] << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//    data = matPerspective.inverted().data();
+//    std::cout << std::endl;
+//    for (int i = 0; i < 4; i++)
+//    {
+//        for (int j = 0; j < 4; j++)
+//        {
+//            std::cout << data[i*4+j] << " ";
+//        }
+//        std::cout << std::endl;
+//    }
 }
 
 void MyOpenGLWidget::mousePressEvent(QMouseEvent *ev) {
     // store x and y coordinates
     widgetX1 = ev->x();
     widgetY1 = ev->y();
+    // width and height are always 600
 }
 
 void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent *ev) {
@@ -278,7 +298,7 @@ void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent *ev) {
 
         for (int i = 0; i < vcount; i++)
         {
-            std::cout << "vertices: " << vertices[i*3] <<
+            std::cout << "vertex " << i << ": " << vertices[i*3] <<
                   " " << vertices[i*3+1] <<
                   " " << vertices[i*3+2] << std::endl;
         }
@@ -340,13 +360,15 @@ void MyOpenGLWidget::mouseReleaseEvent(QMouseEvent *ev) {
 
 void MyOpenGLWidget::saveRayTracedImage()
 {
+
     for (int y = 0; y < height(); y++)
     {
         for (int x = 0; x < width(); x++)
         {
             // create a ray
-
+            Ray r = eyeToPixelRay(x,y);
             // trace ray
+
 
         }
     }
@@ -364,8 +386,8 @@ Ray MyOpenGLWidget::eyeToPixelRay(int xInt, int yInt) const
 {
     double x = xInt, y = yInt; // convert to floats
     convertPixel(x,y);
-    QVector4D p(x,y,0,0);
-    p = matCamera.inverted() * p;
+    QVector4D p(x,y,0,1);
+    p = (matCamera).inverted() * p;
     QVector3D D = (p.toVector3D() - eye).normalized();
     return Ray(eye,D);
 }
@@ -380,11 +402,30 @@ void MyOpenGLWidget::calculateCameraMatrix()
 {
     matCamera.setToIdentity();
     matCamera.lookAt(eye,center,up);
+//    float *data = matCamera.data();
+//    for (int i = 0; i < 4; i++)
+//    {
+//        for (int j = 0; j < 4; j++)
+//        {
+//            std::cout << data[i*4+j] << " ";
+//        }
+//        std::cout << std::endl;
+//    }
+//    data = matCamera.inverted().data();
+//    std::cout << std::endl;
+//    for (int i = 0; i < 4; i++)
+//    {
+//        for (int j = 0; j < 4; j++)
+//        {
+//            std::cout << data[i*4+j] << " ";
+//        }
+//        std::cout << std::endl;
+//    }
 }
 
 void MyOpenGLWidget::resetCamera()
 {
-    eye = QVector3D(0,0,-5);
+    eye = QVector3D(0,0,-1);
     center = QVector3D(0,0,0);
     up = QVector3D(0,1,0);
     calculateCameraMatrix();
@@ -403,6 +444,7 @@ void MyOpenGLWidget::setNextVertex()
             if (selected != world->end()) xform = (*selected)->getXform();
             vertex = (matPerspective * matCamera * xform).inverted() * vertex;
             float x = vertex.x(), y = vertex.y(), z = vertex.z(), w = vertex.w();
+            std::cout << "create vertex: " << x << " " << y << " " << z << " " << w << std::endl;
             vertex.setX(x/w); vertex.setY(y/w); vertex.setZ(z/w); vertex.setW(1.0);
             qvertices[numVerticesChosen++] = vertex;
         }

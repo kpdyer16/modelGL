@@ -53,7 +53,7 @@ void MGL_Parser::begin_object_geo(std::list<std::string> tokens)
 
 void MGL_Parser::sphere_geo(std::list<std::string> tokens)
 {
-    SObject sphere;
+    MGL_SphereNode sphere;
     std::string name = tokens.front(); tokens.pop_front();
     float x = stof(tokens.front()); tokens.pop_front();
     float y = stof(tokens.front()); tokens.pop_front();

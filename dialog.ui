@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>902</width>
-    <height>702</height>
+    <height>706</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -273,6 +273,12 @@
      <item>
       <widget class="MyOpenGLWidget" name="openGLWidget">
        <property name="minimumSize">
+        <size>
+         <width>600</width>
+         <height>600</height>
+        </size>
+       </property>
+       <property name="maximumSize">
         <size>
          <width>600</width>
          <height>600</height>

@@ -5,9 +5,8 @@
 #include <vector>
 #include <fstream>
 #include <QVector4D>
-#include <tobject.h>
-#include <sobject.h>
 #include <mgl_node.h>
+#include <mgl_spherenode.h>
 
 class MGL_Parser
 {

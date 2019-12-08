@@ -3,7 +3,6 @@
 
 #include <tobject.h>
 #include <ttransform.h>
-#include <ray.h>
 
 class MGL_Node
 {
@@ -70,12 +69,14 @@ public:
     QVector3D getCenter() const;
     float getRadius() const;
 
+    void setName(std::string name);
 
     int fillRaw(float *arr) const;
 private:
     TObject *obj;
     TTransform *xform;
     std::list<MGL_Node *> children;
+    std::string name = "default";
 
     // optimization:
     // recalculate averages (for center of bounding sphere

@@ -22,10 +22,10 @@ SOURCES += \
     mgl_node.cpp \
     material.cpp \
     mgl_parser.cpp \
+    mgl_spherenode.cpp \
     myopenglwidget.cpp \
     ray.cpp \
     raytracer.cpp \
-    sobject.cpp \
     tobject.cpp \
     ttransform.cpp
 
@@ -37,12 +37,12 @@ HEADERS += \
     material.h \
     mgl_objectbuffer.h \
     mgl_parser.h \
+    mgl_spherenode.h \
     mode.h \
     myopenglwidget.h \
     ray.h \
     raytracer.h \
     rgb.h \
-    sobject.h \
     tobject.h \
     ttransform.h
 

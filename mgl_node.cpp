@@ -280,10 +280,10 @@ int MGL_Node::fillRaw(float *arr) const
     {
         QVector4D old = QVector4D(vt[i*4],vt[i*4+1],
                                 vt[i*4+2],vt[i*4+3]);
-        old = getXform() * old; // apply transformations
-        arr[i*3] = old.x();
-        arr[i*3+1] = old.y();
-        arr[i*3+2] = old.z();
+        QVector3D raw = (getXform() * old).toVector3DAffine(); // apply transformations
+        arr[i*3] = raw.x();
+        arr[i*3+1] = raw.y();
+        arr[i*3+2] = raw.z();
     }
 
     for (auto &obj: children)

@@ -2,10 +2,10 @@
 #define MGL_OBJECTBUFFER_H
 
 #include <list>
-#include <tobject.h>
 #include <light.h>
 #include <material.h>
 #include <unordered_map>
+#include <mgl_node.h>
 
 //**********************************
 // Stores file generated objects
@@ -15,9 +15,9 @@
 //**********************************
 struct MGL_ObjectBuffer
 {
-    std::list<TObject> tobjects;
+    std::list<MGL_Node *> objects;
     std::list<Light> lights;
-    std::list<Material> materials;
+    std::unordered_map<std::string,Material> materials;
 };
 
 #endif // MGL_OBJECTBUFFER_H

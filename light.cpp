@@ -13,27 +13,27 @@ void Light::setLocation(float x, float y, float z)
 
 void Light::setAmbient(float r, float g, float b)
 {
-    ambient = RGB(r,g,b);
+    ambient = Color(r,g,b);
 }
-void Light::setAmbient(RGB rgb)
+void Light::setAmbient(Color rgb)
 {
     ambient = rgb;
 }
 
 void Light::setDiffuse(float r, float g, float b)
 {
-    diffuse = RGB(r,g,b);
+    diffuse = Color(r,g,b);
 }
-void Light::setDiffuse(RGB rgb)
+void Light::setDiffuse(Color rgb)
 {
     diffuse = rgb;
 }
 
 void Light::setSpecular(float r, float g, float b)
 {
-    specular = RGB(r,g,b);
+    specular = Color(r,g,b);
 }
-void Light::setSpecular(RGB rgb)
+void Light::setSpecular(Color rgb)
 {
     specular = rgb;
 }

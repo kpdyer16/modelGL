@@ -12,17 +12,17 @@ public:
         ambient(r,g,b), diffuse(r,g,b), specular(r,g,b) {}
 
     void setAmbient(float,float,float);
-    void setAmbient(RGB);
+    void setAmbient(Color);
 
     void setDiffuse(float,float,float);
-    void setDiffuse(RGB);
+    void setDiffuse(Color);
 
     void setSpecular(float,float,float);
-    void setSpecular(RGB);
+    void setSpecular(Color);
 
 private:
     std::string name;
-    RGB ambient, diffuse, specular;
+    Color ambient, diffuse, specular;
 };
 
 #endif // MATERIAL_H
