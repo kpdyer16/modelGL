@@ -102,6 +102,8 @@ private:
 
     // helper functions
     bool canAddVertex();
+
+    int mouseMode, keyboardMode;
 };
 
 #endif // MYOPENGLWIDGET_H
